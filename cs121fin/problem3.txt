@@ -1,0 +1,126 @@
+You can put your answers for Problem 3 in this file.  Follow this notation for
+writing your answers in text format:
+
+ * You can write functional dependencies as A -> B
+
+ * You can write a set of functional dependencies as { A -> BC, C -> D }
+
+ * You can write attribute-set closure as {A}+ etc.
+
+ * You can write multivalued dependencies as A ->> B
+
+ * When writing relation schemas, you can indicate primary-key attributes
+   by enclosing them with underscores, e.g. R1(_A_, B, C), R2(_C_, D)
+
+ * Don't forget that primary key attributes should always come first
+   when writing relation schemas
+
+-- [Problem 1a]
+BH is a candidate key.
+We start with {BH}+ = BH. Because of {B -> A, B -> G}, we have {BH}+ = ABGH.
+Because of {A -> CG, GH -> I}, we have {BH}+ = ABCGHI.
+So, BH is a superkey of R.
+
+Then, we prove that it is a candidate key by computing the attribute-set
+closure of all proper subsets.
+{B}+ = ABCG and {H}+ = H
+Since I isn’t included in the closures and we don’t get R,
+we know that BH is a candidate key.
+
+
+-- [Problem 1b]
+Fc = F = {A -> CG, B -> A, AB -> C, B -> G, GH -> I}.
+
+Apply union rule to B -> A and B -> G.
+Fc = {A -> CG, B -> AG, AB -> C, GH -> I}.
+
+Through B -> AG and A -> CG, we know that B -> ACG (pseudo transitivity rule)
+and thus AB -> ACG (augmentation rule) as well. So, AB -> C (reflexivity rule)
+is extraneous. 
+Fc = {A -> CG, B -> AG, GH -> I}.
+
+No two dependencies have the same LHS, and no dependency has any
+extraneous attributes.
+
+-- [Problem 1c]
+All underlined primary keys function as candidate keys on the
+resulting schemas.
+
+Through {B -> AG, A -> CG}, we know that B -> ACG and thus AB -> ACG as well.
+So, AB -> C is extraneous.
+
+Using B -> A and B -> G, decompose R into R1(_B_, A, G) and R1b(B, C, H, I).
+R1 is in 3NF because the only nontrivial dependency that holds on R1 is B -> AG.
+
+Using A -> CG, decompose R1b into R2(_A_, C, G) and R2b(B, H, I).
+R2 is in 3NF because the only nontrivial dependency that holds on R2 is A -> CG.
+
+Using GH -> I, decompose R2b into R3(_G_, _H_, I) and R4(B, H).
+R3 is in 3NF because the only nontrivial dependency that holds on R3 is GH -> I.
+R4 is in 3NF because it is a candidate key of R.
+We don’t specify primary keys for R4 because this is a set;
+in SQL, both B and H would be primary keys.
+
+So, we have R1, R2, R3, and R4 as the complete 3NF decomposition of R.
+
+Note: We could also just go through the cover of F to find the dependencies.
+
+-- [Problem 2a]
+Decompose pizza_orders into:
+customers(_cust_id_, cust_address, cust_phone)
+  and R2b(order_id, pizza_id, pizza_size, topping)
+
+Customers is in 4NF because it is also in BCNF: all functional dependencies
+that hold on this relation have cust_id on the LHS, and cust_id is the primary
+key and candidate key.
+
+Decompose R1b into:
+orders(_order_id_, cust_id, order_time)
+  and R1b(order_id, cust_address, cust_phone, pizza_id, pizza_size, topping)
+ * cust_id is a foreign key to customers.cust_id
+
+Orders is in 4NF because it is also in BCNF: all functional dependencies that
+hold on this relation have order_id on the LHS, and order_id is the primary key
+and candidate key.
+
+Decompose R2b into:
+pizzas(_pizza_id_, order_id, pizza_size)
+  and R3b(pizza_id, topping)
+ * order_id is a foreign key to orders.order_id
+
+Pizzas is in 4NF because it is also in BCNF: all functional dependencies that
+hold on this relation have pizza_id on the LHS, and pizza_id is the primary key
+and candidate key.
+
+R3b is a candidate key:
+toppings(pizza_id, topping)
+ * pizza_id is a foreign key to pizzas.pizza_id
+
+Toppings is in 4NF because the only multivalued dependency pizza_id ->> topping
+is trivial since pizza_id and topping form a superkey of pizza_orders. This is a
+set, so primary keys don’t need to be clarified. However, in SQL, both
+attributes would be part of the primary key and candidate key.
+
+We have customers, orders, pizzas, and toppings as the complete 4NF
+decomposition of R.
+
+
+-- [Problem 2b]
+—- Went a half hour over the time limit for this problem.
+
+It is impossible to create a version that is in BCNF but not in 4NF. This is
+mostly because we only have a _trivial_ multivalued dependency, which means that
+pizza_orders will be in 4NF if it is in BCNF.
+
+
+My attempt at creating a solution:
+To prevent the database schema from being in 4NF while still being in BCNF, we
+want to combine these two dependencies: {pizza_id -> order_id, pizza_size,
+pizza_id ->> topping}.
+If we replace pizzas and toppings in our database schema with
+pizzas_with_toppings(_pizza_id_, _topping_, order_id, pizza_size), we would have
+a relation that meets the criteria for BCNF since BCNF doesn’t care about
+multivalued dependencies. It would still be in 4NF since the toppings are
+probably relevant to the pizza size and order_id. Also, pizza_id ->> topping
+holds because it is a trivial multivalued dependency (pizza_id and topping
+include all attributes of pizza_orders).
