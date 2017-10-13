@@ -1,0 +1,27 @@
+-- [Problem 2]
+
+user_accounts(_username_, email_address, salt, password_hash)
+
+media_item(_item_id_, title, item_description, upload_time, downloads)
+
+photo(_item_id_, photo_filename, photo_data)
+ * item_id is a foreign key to media_item.item_id
+
+video(_item_id_, video_filename, length)
+ * item_id is a foreign key to media_item.item_id
+ * video_filename is also a candidate key because it has the path and filename
+
+albums(_username_, _album_name_, album_description, summary_photo)
+ * username is a foreign key to user_accounts.username
+
+uploaded(_username_, _item_id_, _album_name_)
+ * username is a foreign key to user_accounts.username
+ * item_id is a foreign key to media_item.item_id
+ * album_name is a foreign key to albums.album_name
+
+Combined the has and commented relationship-sets because they have many-to-one
+relationships with total participation on the many side. This is because all
+comments are guaranteed to have a username and item_id associated with them.
+comments(_username_, _item_id_, _create_time_, text)
+ * username is a foreign key to user_accounts.username
+ * item_id is a foreign key to media_item.item_id
